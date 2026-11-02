@@ -1,9 +1,6 @@
 """
 Machine Learning Pipeline & Model Training Script: AI Student Failure Pattern Analyzer
 Project: AI Student Failure Pattern Analyzer - Analyzing Academic and Behavioral Factors for Early Risk Detection
-Author & USN: Himani Tuli | 25MSDSR074 (M.Sc. Data Science & Analytics)
-Institution: Department of Data Analytics & Mathematical Sciences, JAIN (Deemed-to-be University)
-Faculty Guide: Dr. M A Ghouse Basha
 
 Objective:
 Predict postgraduate / Master's cohort academic performance (CGPA) using academic foundation markers

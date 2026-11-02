@@ -7,22 +7,11 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/)
 [![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.3%2B-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 [![Status](https://img.shields.io/badge/Tests-11%20Passed-22C55E?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/himani2005tuli-wq/AI-Student-Failure-Pattern-Analyzer)
-[![Institution](https://img.shields.io/badge/Institution-JAIN%20University-1E3A8A?style=for-the-badge)](https://www.jainuniversity.ac.in/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
 <p align="center">
   <strong>An end-to-end predictive and prescriptive machine learning system combining academic foundation markers, lifestyle habits, and psychometric behavioural indicators to detect academic vulnerability early and recommend personalized recovery interventions.</strong>
 </p>
-
----
-
-**Author:** Himani Tuli &nbsp;|&nbsp; **USN:** `25MSDSR074`  
-**Degree:** Master of Science in Data Science and Analytics  
-**Department:** Department of Data Analytics & Mathematical Sciences  
-**Institution:** JAIN (Deemed-to-be University), Bangalore, Karnataka, India  
-**Faculty Guide & Supervisor:** Dr. M A Ghouse Basha  
-
----
 
 </div>
 
@@ -199,8 +188,8 @@ The web interface (`app.py`) is organized into four interactive modules:
 ├── .gitignore                       # Git ignore rules (caches, checkpoints, logs)
 ├── LICENSE                          # MIT Open-Source License
 ├── README.md                        # Academic documentation & system guide
-├── Himani_Synopsis.pdf              # Academic project synopsis
-├── Himani_Tuli_AI_Risk_Detection... # Academic final thesis report
+├── Project_Synopsis.pdf             # Project research synopsis
+├── Project_Final_Report.pdf         # Comprehensive research project report
 ├── qrcode_docs.google.com.png       # Survey instrument QR code
 └── outputs/                         # Serialized production artifacts & plots
     ├── best_pipeline.joblib         # Extra Trees champion model pipeline
@@ -302,14 +291,12 @@ ALL 11 APPLICATION VERIFICATION CHECKS PASSED WITH ZERO ERRORS!
 
 ## 📜 Citation & Attribution
 
-If you reference or build upon this research work, please cite:
+If you reference or build upon this project, please cite:
 
 ```bibtex
-@misc{tuli2026failurepatternanalyzer,
-  author = {Himani Tuli},
+@misc{studentfailurepatternanalyzer2026,
   title = {AI Student Failure Pattern Analyzer: Analyzing Academic and Behavioral Factors for Student Performance Prediction & Early Risk Detection},
   year = {2026},
-  school = {Department of Data Analytics & Mathematical Sciences, JAIN (Deemed-to-be University)},
   url = {https://github.com/himani2005tuli-wq/AI-Student-Failure-Pattern-Analyzer}
 }
 ```
@@ -317,5 +304,5 @@ If you reference or build upon this research work, please cite:
 ---
 
 <div align="center">
-  <sub>Developed by Himani Tuli | M.Sc. Data Science and Analytics | JAIN (Deemed-to-be University)</sub>
+  <sub>AI Student Failure Pattern Analyzer &bull; Open-Source Academic Research System</sub>
 </div>

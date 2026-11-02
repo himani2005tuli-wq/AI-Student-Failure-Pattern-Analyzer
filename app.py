@@ -9,7 +9,7 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_sco
 
 # Set page configuration with institutional branding
 st.set_page_config(
-    page_title="AI Student Failure Pattern Analyzer | JAIN University",
+    page_title="AI Student Failure Pattern Analyzer",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -74,10 +74,8 @@ st.markdown("""
 st.markdown("""
 <div class="main-header">
     <h1 style="margin:0; font-size:28px;">🎓 AI Student Failure Pattern Analyzer</h1>
-    <p style="margin:4px 0 0 0; opacity:0.9; font-size:15px;">
-        Analyzing Academic & Behavioral Patterns for Early Risk Detection and Performance Recovery<br>
-        Department of Data Analytics & Mathematical Sciences, JAIN (Deemed-to-be University)<br>
-        <strong>Author & USN:</strong> Himani Tuli | 25MSDSR074 (M.Sc. DSA) &nbsp;|&nbsp; <strong>Faculty Guide:</strong> Dr. M A Ghouse Basha
+    <p style="margin:6px 0 0 0; opacity:0.92; font-size:15px;">
+        Analyzing Academic & Behavioral Patterns for Early Risk Detection and Performance Recovery
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -795,7 +793,7 @@ with tab_batch:
         st.download_button(
             label="📥 Download Official Institutional At-Risk Early Warning Report (CSV)",
             data=csv_download,
-            file_name="JAIN_Masters_Academic_Early_Risk_Report.csv",
+            file_name="Student_Academic_Early_Risk_Report.csv",
             mime="text/csv",
             use_container_width=True
         )
