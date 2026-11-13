@@ -11,19 +11,28 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_sco
 st.set_page_config(
     page_title="AI Student Failure Pattern Analyzer",
     page_icon="🎓",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered",
+    initial_sidebar_state="auto"
 )
 
 # Custom Styling for Academic & Professional Polish
 st.markdown("""
 <style>
+    .block-container {
+        max-width: 860px;
+        padding-top: 1.5rem;
+        padding-bottom: 2.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        margin: 0 auto;
+    }
     .main-header {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
-        padding: 24px;
+        padding: 22px;
         border-radius: 12px;
         color: white;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
+        text-align: center;
     }
     .metric-card {
         background-color: #F8FAFC;
