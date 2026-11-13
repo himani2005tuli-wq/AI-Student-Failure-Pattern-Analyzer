@@ -11,20 +11,19 @@ from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_sco
 st.set_page_config(
     page_title="AI Student Failure Pattern Analyzer",
     page_icon="🎓",
-    layout="centered",
-    initial_sidebar_state="auto"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # Custom Styling for Academic & Professional Polish
 st.markdown("""
 <style>
     .block-container {
-        max-width: 860px;
-        padding-top: 1.5rem;
+        max-width: 100%;
+        padding-top: 1.2rem;
         padding-bottom: 2.5rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        margin: 0 auto;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
     }
     .main-header {
         background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
@@ -33,34 +32,40 @@ st.markdown("""
         color: white;
         margin-bottom: 20px;
         text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     .metric-card {
-        background-color: #F8FAFC;
+        background-color: rgba(30, 41, 59, 0.7);
+        border: 1px solid #334155;
         border-left: 5px solid #2563EB;
         padding: 16px;
         border-radius: 8px;
         margin-bottom: 12px;
+        color: #F8FAFC;
     }
     .high-risk {
-        background-color: #FEF2F2;
-        border: 1px solid #F87171;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(185, 28, 28, 0.28) 100%);
+        border: 1px solid #EF4444;
         border-radius: 10px;
-        padding: 18px;
-        color: #991B1B;
+        padding: 20px;
+        color: #FCA5A5;
+        box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
     }
     .medium-risk {
-        background-color: #FFFBEB;
-        border: 1px solid #FBBF24;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.28) 100%);
+        border: 1px solid #F59E0B;
         border-radius: 10px;
-        padding: 18px;
-        color: #92400E;
+        padding: 20px;
+        color: #FDE68A;
+        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
     }
     .low-risk {
-        background-color: #ECFDF5;
-        border: 1px solid #34D399;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(4, 120, 87, 0.28) 100%);
+        border: 1px solid #10B981;
         border-radius: 10px;
-        padding: 18px;
-        color: #065F46;
+        padding: 20px;
+        color: #A7F3D0;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
     }
     .stButton>button {
         background: linear-gradient(90deg, #1D4ED8 0%, #2563EB 100%);
@@ -406,11 +411,11 @@ with tab_eval:
             recommendations = generate_recommendations(student_data)
             
             for r in recommendations:
-                badge_color = "#DC2626" if r["severity"] in ["Critical", "High"] else ("#D97706" if r["severity"] == "Medium" else "#2563EB")
+                badge_color = "#EF4444" if r["severity"] in ["Critical", "High"] else ("#F59E0B" if r["severity"] == "Medium" else "#3B82F6")
                 st.markdown(f"""
-                <div style="background-color: #F8FAFC; border-left: 4px solid {badge_color}; padding: 10px 14px; margin-bottom: 8px; border-radius: 4px;">
-                    <span style="font-weight: bold; font-size: 14px;">[{r['category']}]</span> - {r['recommendation']}<br>
-                    <small style="color: #64748B;"><em>Trigger: {r['trigger']}</em></small>
+                <div style="background-color: rgba(30, 41, 59, 0.75); border: 1px solid #334155; border-left: 5px solid {badge_color}; padding: 12px 16px; margin-bottom: 10px; border-radius: 6px;">
+                    <span style="font-weight: bold; font-size: 14px; color: #F8FAFC;">[{r['category']}]</span> <span style="color: #E2E8F0;">— {r['recommendation']}</span><br>
+                    <small style="color: #94A3B8;"><em>Trigger: {r['trigger']}</em></small>
                 </div>
                 """, unsafe_allow_html=True)
             st.caption("ℹ️ *Recommendations are rule-based advisory suggestions designed for student support and do not guarantee grade increases.*")
