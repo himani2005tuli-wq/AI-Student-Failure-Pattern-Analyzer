@@ -76,18 +76,18 @@ Preprocessing pipelines (`ColumnTransformer` with median imputation + standard s
 
 Model selection was conducted via **5-fold cross-validation on the 85 training samples**, reserving the 22 held-out test samples (20%) for final validation:
 
-| Rank | Model Pipeline | Train $R^2$ | 5-Fold CV MAE | 5-Fold CV $R^2$ | Test MAE | Test RMSE | Test $R^2$ | Tolerance Accuracy (±0.75 CGPA) | Selection Decision |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| 🥇 | **Random Forest Regressor** | **50.12%** | **0.6136** | **+0.0796** | **0.5865** | **0.7561** | **+0.0385** | **68.2% (86.4% ±1.0)** | **Champion Model** |
-| 🥈 | Gradient Boosting Regressor | 53.76% | 0.6310 | +0.0050 | 0.5826 | 0.7563 | +0.0380 | 63.6% | Runner-Up |
-| 🥉 | Extra Trees Regressor | 40.83% | 0.6137 | +0.0578 | 0.6344 | 0.7679 | +0.0081 | 63.6% | Ensemble Baseline |
-| 4 | Ridge Regression | 33.66% | 0.6449 | -0.1773 | 0.6493 | 0.7957 | -0.0650 | 68.2% | Linear Regularized |
-| 5 | Linear Regression (OLS) | 35.24% | 0.7232 | -0.4620 | 0.6605 | 0.8040 | -0.0873 | 63.6% | Multicollinear Baseline |
-| 6 | Decision Tree Regressor | 52.20% | 0.6570 | -0.1673 | 0.7467 | 0.8697 | -0.2720 | 59.1% | Pruned Tree |
+| Rank | Model Pipeline | Train $R^2$ | 5-Fold CV MAE | 5-Fold CV $R^2$ | Test MAE | Test RMSE | Test $R^2$ | Tolerance Accuracy (±0.75) | Tolerance Accuracy (±1.0) | Selection Decision |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| 🥇 | **Random Forest Regressor** | **50.12%** | **0.6136** | **+0.0796** | **0.5865** | **0.7561** | **+0.0385** | **68.2% (15/22)** | **72.7% (16/22)** | **Champion Model** |
+| 🥈 | Gradient Boosting Regressor | 53.76% | 0.6310 | +0.0050 | 0.5826 | 0.7563 | +0.0380 | 63.6% (14/22) | 77.3% (17/22) | Runner-Up |
+| 🥉 | Extra Trees Regressor | 40.83% | 0.6137 | +0.0578 | 0.6344 | 0.7679 | +0.0081 | 63.6% (14/22) | 77.3% (17/22) | Ensemble Baseline |
+| 4 | Ridge Regression | 33.66% | 0.6449 | -0.1773 | 0.6493 | 0.7957 | -0.0650 | 68.2% (15/22) | 72.7% (16/22) | Linear Regularized |
+| 5 | Linear Regression (OLS) | 35.24% | 0.7232 | -0.4620 | 0.6605 | 0.8040 | -0.0873 | 63.6% (14/22) | 77.3% (17/22) | Multicollinear Baseline |
+| 6 | Decision Tree Regressor | 52.20% | 0.6570 | -0.1673 | 0.7467 | 0.8697 | -0.2720 | 59.1% (13/22) | 59.1% (13/22) | Pruned Tree |
 
 > [!NOTE]
 > **Academic Model Selection Rationale:**  
-> **Random Forest** achieved the lowest 5-fold cross-validation MAE (`0.6136`) and highest CV $R^2$ (`+0.0796`) across internal validation folds, while maintaining positive generalization on the held-out test set ($R^2 = +0.0385$, MAE = `0.5865`, with **86.4% of student predictions within ±1.0 CGPA**).
+> **Random Forest** achieved the lowest 5-fold cross-validation MAE (`0.6136`) and highest CV $R^2$ (`+0.0796`) across internal validation folds, while maintaining positive generalization on the held-out test set ($R^2 = +0.0385$, MAE = `0.5865`, with **72.7% of student predictions within ±1.0 CGPA** and **68.2% within ±0.75 CGPA**).
 
 ### Understanding Model Performance: $R^2$ vs Prediction Accuracy
 
@@ -100,13 +100,15 @@ $$SS_{\text{tot}} = \sum (y_i - 8.09)^2 = 13.08 \quad (s = 0.789)$$
 
 Because $SS_{\text{tot}}$ is so small, an average prediction error of just $\approx 0.60$ CGPA points generates a residual sum of squares $SS_{\text{res}} \approx 13.6$. When $SS_{\text{res}} > SS_{\text{tot}}$, the ratio exceeds $1.0$, rendering $R^2$ slightly negative. This indicates that predicting the exact test-set sample mean would achieve slightly lower squared loss than a model making minor errors on those specific 22 samples, purely due to the compressed target variance.
 
-#### 2. Clarifying the "~80%" Metric Expectation
-1. **Training $R^2$ vs Test $R^2$:** Unregularized OLS regression achieves **Train $R^2 = 86.23\%$** ($0.8623$) on this dataset due to high-dimensional categorical encoding (`programme`), but completely collapses on unseen test data ($R^2 = -0.8543$). Regularized models achieve a stable **Train $R^2$ of 50.1% – 53.8%**.
-2. **Prediction Accuracy within Tolerance:** In practical higher education analytics, accuracy is evaluated within clinically acceptable tolerance bounds:
-   - **Accuracy within $\pm 1.0$ CGPA:** **86.4%** ($\approx 86\%$)
-   - **Accuracy within $\pm 0.75$ CGPA:** **68.2%**
-   - **Risk Tier Classification Accuracy (< 8.0 vs $\ge$ 8.0):** **77.3% – 81.8%** ($\approx 80\%$)
-3. **Behavioral Domain Standards:** In educational psychometrics (using self-reported survey indicators of stress, procrastination, and study habits to predict academic outcomes), true population explained variance $R^2$ in peer-reviewed literature typically ranges from **$0.15$ to $0.35$** ($15\% - 35\%$). Claiming $80\% R^2$ on real-world survey regression would indicate severe data leakage or overfitting.
+#### 2. Clarifying Tolerance Accuracy & $R^2$
+1. **Training $R^2$ vs Test $R^2$:** Unregularized OLS regression achieves **Train $R^2 = 86.23\%$** ($0.8623$) on this dataset due to high-dimensional categorical encoding (`programme`), but completely collapses on unseen test data ($R^2 = -0.8543$). Regularized Random Forest achieves a stable **Train $R^2$ of 50.12%**.
+2. **Prediction Accuracy within Tolerance (Verified Directly on $N=22$ Test Samples):**
+   - **Narrow Window ($\pm 0.50$ CGPA):** **45.5%** (10 / 22 test students)
+   - **Target Band ($\pm 0.75$ CGPA):** **68.2%** (15 / 22 test students)
+   - **Institutional Window ($\pm 1.00$ CGPA):** **72.7%** (16 / 22 test students)
+   - **Broad Window ($\pm 1.25$ CGPA):** **86.4%** (19 / 22 test students)
+   *(A tighter tolerance band contains fewer predictions, so Accuracy($\pm 0.75$) $\le$ Accuracy($\pm 1.00$)).*
+3. **Behavioral Domain Standards:** In educational psychometrics (using self-reported survey indicators of stress, procrastination, and study habits to predict academic outcomes), true population explained variance $R^2$ in peer-reviewed literature typically ranges from **$0.15$ to $0.35$** ($15\% - 35\%$). A test $R^2$ of $+0.0385$ represents a modest $3.85\%$ relative error reduction over predicting the test-set mean baseline.
 
 ### Evaluation Visualizations
 
