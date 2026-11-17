@@ -246,19 +246,18 @@ with st.sidebar:
     if feature_importances is not None and not feature_importances.empty:
         st.markdown("---")
         st.markdown("### 🔍 Top Predictor Contributors")
-        st.caption("Gini Feature Importance (MDI) dynamically extracted from trained champion model:")
+        st.caption("Mean Decrease in Impurity (MDI) / Impurity-Based Feature Importance dynamically extracted from trained champion model:")
         for idx, (feat, val) in enumerate(feature_importances.head(5).items(), 1):
-            clean_name = feat.replace("marks_", "").replace("_", " ").title()
-            st.markdown(f"**{idx}. {clean_name}:** `{val * 100:.1f}%`")
+            st.markdown(f"**{idx}. {feat}:** `{val * 100:.1f}%`")
         st.caption("⚠️ *Reflects model predictive association, not causal proof.*")
         
     st.markdown("---")
     st.markdown("### ⚙️ Quick Presets")
     preset_choice = st.selectbox(
         "Load Student Persona Profile",
-        ["Custom Input", "High-Risk Candidate (Illustrative)", "Average Student with High Stress (Illustrative)", "High Achiever (Illustrative)"]
+        ["Custom Input", "High-Risk Candidate (Illustrative Example)", "Average Student with High Stress (Illustrative Example)", "High Achiever (Illustrative Example)"]
     )
-    st.caption("Select an illustrative persona preset to auto-populate the assessment form.")
+    st.caption("Select an illustrative preset profile (for demonstration only) to auto-populate the assessment form.")
 
 # Parse Preset Values
 default_10th = 8.5
@@ -873,16 +872,16 @@ with tab_analytics:
             st.info("Actual vs. Predicted plot available after running `python train_pipeline.py`.")
             
     with c_img2:
-        st.markdown("##### 🌲 Gini Feature Importance (Champion Model)")
+        st.markdown("##### 🌲 Mean Decrease in Impurity (MDI) / Impurity-Based Feature Importance")
         if os.path.exists("outputs/plots/feature_importance.png"):
-            st.image("outputs/plots/feature_importance.png", caption="Gini Feature Importance for Master's CGPA", use_container_width=True)
+            st.image("outputs/plots/feature_importance.png", caption="Mean Decrease in Impurity (MDI) / Impurity-Based Feature Importance", use_container_width=True)
         elif feature_importances is not None and not feature_importances.empty:
             fig_fi = px.bar(
                 x=feature_importances.values[:10],
-                y=[f.replace("marks_", "").replace("_", " ").title() for f in feature_importances.index[:10]],
+                y=feature_importances.index[:10],
                 orientation="h",
                 labels={"x": "Relative Importance", "y": "Feature"},
-                title="Gini Feature Importance (MDI)"
+                title="Mean Decrease in Impurity (MDI) / Impurity-Based Feature Importance"
             )
             fig_fi.update_layout(yaxis=dict(autorange="reversed"), height=350)
             st.plotly_chart(fig_fi, use_container_width=True)
@@ -908,6 +907,6 @@ with tab_methodology:
     4. **Stage 4 (Exploratory Data Analysis):** Analyzed correlation heatmaps, feature distributions, and multicollinearity patterns.
     5. **Stage 5 (Leakage-Free Pipeline Architecture):** Built Scikit-Learn `ColumnTransformer` wrapping numerical imputation (`median`) and `StandardScaler` for continuous features, alongside categorical imputation (`most_frequent`) and `OneHotEncoder(handle_unknown='ignore')` for `gender` and `programme`. Target variable strictly excluded from features.
     6. **Stage 6 (Multi-Model 5-Fold Cross-Validation & Benchmark):** Trained 6 regression algorithms (Linear Regression, Ridge, Decision Tree, Random Forest, Extra Trees, Gradient Boosting) using 80/20 train/test split. Champion model selected based strictly on 5-fold cross-validation on the training set.
-    7. **Stage 7 (Explainability & Feature Importance):** Dynamic extraction of Gini feature importances (Mean Decrease in Impurity) indicating primary predictive contributions from academic foundations (12th Marks, 10th Marks) and behavioral self-regulation (Procrastination, Stress).
+    7. **Stage 7 (Explainability & Feature Importance):** Dynamic extraction of Mean Decrease in Impurity (MDI) / Impurity-Based Feature Importance indicating primary predictive associations from academic foundations (12th Marks, 10th Marks) and behavioral self-regulation (Procrastination, Stress). Highlights predictive association, not causal proof.
     8. **Stage 8 (Decoupled Personalised Prescriptions):** Independent rule-based advisory engine generating actionable, prioritized interventions across attendance, stress, procrastination, study time, and sleep hygiene.
     """)

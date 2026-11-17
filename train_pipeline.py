@@ -369,24 +369,41 @@ plt.close()
 print("[+] Saved actual vs predicted plot: outputs/plots/actual_vs_predicted.png")
 
 # ==============================================================================
-# STAGE 7: DYNAMIC FEATURE IMPORTANCE & EXPLAINABILITY
+# STAGE 7: DYNAMIC FEATURE IMPORTANCE & EXPLAINABILITY (MDI)
 # ==============================================================================
 print("\n" + "=" * 78)
-print("STAGE 7: DYNAMIC FEATURE IMPORTANCE EXTRACTION (CHAMPION MODEL)")
+print("STAGE 7: MEAN DECREASE IN IMPURITY (MDI) / IMPURITY-BASED FEATURE IMPORTANCE")
 print("=" * 78)
 
 champion_estimator = best_pipeline.named_steps["model"]
 preprocessor_step = best_pipeline.named_steps["preprocessor"]
 
-# Extract transformed feature names directly from preprocessor
 raw_feat_names = list(preprocessor_step.get_feature_names_out())
-clean_feat_names = [f.replace("num__", "").replace("cat__", "") for f in raw_feat_names]
+
+def map_to_original_feature(name):
+    clean = name.replace("num__", "").replace("cat__", "")
+    if clean.startswith("gender_"): return "Gender"
+    if clean.startswith("programme_"): return "Programme"
+    if clean == "marks_12th": return "12th Grade Marks"
+    if clean == "marks_10th": return "10th Grade Marks"
+    if clean == "procrastination_score": return "Academic Procrastination Score"
+    if clean == "stress_score": return "Perceived Stress Score"
+    if clean == "study_hours": return "Daily Study Hours"
+    if clean == "sleep_hours": return "Average Sleep Duration"
+    if clean == "attendance": return "Class Attendance Percentage"
+    if clean == "age": return "Age"
+    return clean
 
 if hasattr(champion_estimator, "feature_importances_"):
-    feat_imp = pd.Series(champion_estimator.feature_importances_, index=clean_feat_names).sort_values(ascending=False)
-    print(f"\nGini Feature Importance Rankings ({best_model_name}):")
-    for feat, imp in feat_imp.head(10).items():
-        print(f"  - {feat:<30}: {imp * 100:.2f}%")
+    df_feat_imp = pd.DataFrame({"raw": raw_feat_names, "importance": champion_estimator.feature_importances_})
+    df_feat_imp["original"] = df_feat_imp["raw"].apply(map_to_original_feature)
+    feat_imp = df_feat_imp.groupby("original")["importance"].sum().sort_values(ascending=False)
+    # Normalized for display
+    feat_imp = feat_imp / feat_imp.sum()
+    
+    print(f"\nMean Decrease in Impurity (MDI) / Impurity-Based Feature Importance ({best_model_name}):")
+    for feat, imp in feat_imp.items():
+        print(f"  - {feat:<32}: {imp * 100:.2f}%")
         
     joblib.dump(feat_imp, os.path.join(MODEL_DIR, "feature_importances.joblib"))
     print(f"[+] Saved feature importance series: {os.path.join(MODEL_DIR, 'feature_importances.joblib')}")
@@ -394,8 +411,8 @@ if hasattr(champion_estimator, "feature_importances_"):
     # Plot Feature Importances
     plt.figure(figsize=(10, 5))
     feat_imp.head(8).plot(kind="barh", color="#10B981")
-    plt.title(f"Gini Feature Importance for Master's CGPA Prediction ({best_model_name})", fontsize=12, fontweight="bold")
-    plt.xlabel("Relative Importance (Mean Decrease in Impurity)")
+    plt.title(f"Mean Decrease in Impurity (MDI) / Impurity-Based Feature Importance\n{best_model_name} (Predictive Association, Not Causal)", fontsize=11, fontweight="bold")
+    plt.xlabel("Mean Decrease in Impurity (Normalized Relative Importance)")
     plt.gca().invert_yaxis()
     plt.tight_layout()
     plt.savefig("outputs/plots/feature_importance.png", dpi=300)
