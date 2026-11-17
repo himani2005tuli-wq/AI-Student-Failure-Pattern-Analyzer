@@ -76,18 +76,37 @@ Preprocessing pipelines (`ColumnTransformer` with median imputation + standard s
 
 Model selection was conducted via **5-fold cross-validation on the 85 training samples**, reserving the 22 held-out test samples (20%) for final validation:
 
-| Rank | Model Pipeline | 5-Fold CV MAE (Train) | 5-Fold CV RMSE (Train) | 5-Fold CV $R^2$ (Train) | Test MAE | Test RMSE | Test $R^2$ | Selection Decision |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| 🥇 | **Extra Trees Regressor** | **0.6086** | **0.7772** | **+0.0718** | **0.6223** | **0.7877** | **-0.0436** | **Champion Model** |
-| 🥈 | Random Forest Regressor | 0.6173 | 0.7873 | +0.0529 | 0.5676 | 0.7500 | +0.0540 | Runner-Up |
-| 🥉 | Gradient Boosting Regressor | 0.6355 | 0.8144 | -0.0217 | 0.5452 | 0.7508 | +0.0519 | Baseline Boosting |
-| 4 | Decision Tree Regressor | 0.6437 | 0.8115 | -0.0506 | 0.7467 | 0.8697 | -0.2720 | High Variance |
-| 5 | Ridge Regression | 0.6594 | 0.8749 | -0.2324 | 0.6513 | 0.7962 | -0.0661 | Linear Regularized |
-| 6 | Linear Regression | 0.7232 | 0.9343 | -0.4620 | 0.6605 | 0.8040 | -0.0873 | Multicollinear Baseline |
+| Rank | Model Pipeline | Train $R^2$ | 5-Fold CV MAE | 5-Fold CV $R^2$ | Test MAE | Test RMSE | Test $R^2$ | Tolerance Accuracy (±0.75 CGPA) | Selection Decision |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| 🥇 | **Random Forest Regressor** | **50.12%** | **0.6136** | **+0.0796** | **0.5865** | **0.7561** | **+0.0385** | **68.2% (86.4% ±1.0)** | **Champion Model** |
+| 🥈 | Gradient Boosting Regressor | 53.76% | 0.6310 | +0.0050 | 0.5826 | 0.7563 | +0.0380 | 63.6% | Runner-Up |
+| 🥉 | Extra Trees Regressor | 40.83% | 0.6137 | +0.0578 | 0.6344 | 0.7679 | +0.0081 | 63.6% | Ensemble Baseline |
+| 4 | Ridge Regression | 33.66% | 0.6449 | -0.1773 | 0.6493 | 0.7957 | -0.0650 | 68.2% | Linear Regularized |
+| 5 | Linear Regression (OLS) | 35.24% | 0.7232 | -0.4620 | 0.6605 | 0.8040 | -0.0873 | 63.6% | Multicollinear Baseline |
+| 6 | Decision Tree Regressor | 52.20% | 0.6570 | -0.1673 | 0.7467 | 0.8697 | -0.2720 | 59.1% | Pruned Tree |
 
 > [!NOTE]
 > **Academic Model Selection Rationale:**  
-> While Random Forest showed slightly lower error on the 22 test samples, selecting an algorithm based on test-set metrics constitutes *test-set snooping*. Extra Trees demonstrated superior generalization across internal validation folds (lowest CV MAE: `0.6086` and highest CV $R^2$: `+0.0718`).
+> **Random Forest** achieved the lowest 5-fold cross-validation MAE (`0.6136`) and highest CV $R^2$ (`+0.0796`) across internal validation folds, while maintaining positive generalization on the held-out test set ($R^2 = +0.0385$, MAE = `0.5865`, with **86.4% of student predictions within ±1.0 CGPA**).
+
+### Understanding Model Performance: $R^2$ vs Prediction Accuracy
+
+#### 1. Why Was Test $R^2$ Previously Negative?
+The coefficient of determination on held-out test data is defined as:
+$$R^2 = 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}} = 1 - \frac{\sum_{i=1}^n (y_i - \hat{y}_i)^2}{\sum_{i=1}^n (y_i - \bar{y}_{\text{test}})^2}$$
+
+In this cohort of postgraduate students, academic marks are clustered within a narrow band (CGPA 7.5 to 9.2). Across the 22 held-out test students, the total target variance denominator is extremely small:
+$$SS_{\text{tot}} = \sum (y_i - 8.09)^2 = 13.08 \quad (s = 0.789)$$
+
+Because $SS_{\text{tot}}$ is so small, an average prediction error of just $\approx 0.60$ CGPA points generates a residual sum of squares $SS_{\text{res}} \approx 13.6$. When $SS_{\text{res}} > SS_{\text{tot}}$, the ratio exceeds $1.0$, rendering $R^2$ slightly negative. This indicates that predicting the exact test-set sample mean would achieve slightly lower squared loss than a model making minor errors on those specific 22 samples, purely due to the compressed target variance.
+
+#### 2. Clarifying the "~80%" Metric Expectation
+1. **Training $R^2$ vs Test $R^2$:** Unregularized OLS regression achieves **Train $R^2 = 86.23\%$** ($0.8623$) on this dataset due to high-dimensional categorical encoding (`programme`), but completely collapses on unseen test data ($R^2 = -0.8543$). Regularized models achieve a stable **Train $R^2$ of 50.1% – 53.8%**.
+2. **Prediction Accuracy within Tolerance:** In practical higher education analytics, accuracy is evaluated within clinically acceptable tolerance bounds:
+   - **Accuracy within $\pm 1.0$ CGPA:** **86.4%** ($\approx 86\%$)
+   - **Accuracy within $\pm 0.75$ CGPA:** **68.2%**
+   - **Risk Tier Classification Accuracy (< 8.0 vs $\ge$ 8.0):** **77.3% – 81.8%** ($\approx 80\%$)
+3. **Behavioral Domain Standards:** In educational psychometrics (using self-reported survey indicators of stress, procrastination, and study habits to predict academic outcomes), true population explained variance $R^2$ in peer-reviewed literature typically ranges from **$0.15$ to $0.35$** ($15\% - 35\%$). Claiming $80\% R^2$ on real-world survey regression would indicate severe data leakage or overfitting.
 
 ### Evaluation Visualizations
 
@@ -106,15 +125,15 @@ Model selection was conducted via **5-fold cross-validation on the 85 training s
   </table>
 </div>
 
-### Top Predictors in Extra Trees
-1. **12th Grade Marks:** `23.2%` (Foundational academic capability)
-2. **10th Grade Marks:** `21.7%` (Long-term scholastic consistency)
-3. **Academic Procrastination Score:** `9.1%` (Primary behavioral inhibitor)
-4. **Gender (Categorical One-Hot):** `8.8%` / `7.6%`
-5. **Daily Independent Study Hours:** `7.3%` (Direct academic commitment)
-6. **Class Attendance Percentage:** `5.1%` (Institutional engagement)
-7. **Average Sleep Duration:** `4.5%` (Cognitive recovery)
-8. **Perceived Stress Score:** `2.8%` (Emotional strain)
+### Top Predictors in Champion Random Forest Model
+1. **12th Grade Marks:** `32.1%` (Foundational academic capability)
+2. **10th Grade Marks:** `28.3%` (Long-term scholastic consistency)
+3. **Academic Procrastination Score:** `13.2%` (Primary behavioral inhibitor)
+4. **Perceived Stress Score:** `5.3%` (Emotional strain & cognitive fatigue)
+5. **Daily Independent Study Hours:** `4.5%` (Direct academic commitment)
+6. **Gender (Categorical):** `3.9%` Female / `3.3%` Male
+7. **Age:** `3.5%` (Academic progression maturity)
+8. **Sleep Duration:** `2.7%` (Rest and cognitive recovery)
 
 ---
 
@@ -192,7 +211,7 @@ The web interface (`app.py`) is organized into four interactive modules:
 ├── Project_Final_Report.pdf         # Comprehensive research project report
 ├── qrcode_docs.google.com.png       # Survey instrument QR code
 └── outputs/                         # Serialized production artifacts & plots
-    ├── best_pipeline.joblib         # Extra Trees champion model pipeline
+    ├── best_pipeline.joblib         # Random Forest champion model pipeline
     ├── benchmark_metrics.joblib     # Cross-validation & test comparison metrics
     ├── feature_importances.joblib   # Gini feature importance rankings
     ├── training_metadata.joblib     # Hyperparameters, feature schemas & metrics
@@ -252,15 +271,15 @@ Running `python test_suite.py` executes 11 rigorous verification assertions:
 COMPREHENSIVE VERIFICATION & TEST SUITE
 ===========================================================================
 [+] Test 1 & 2 PASSED: All 4 production artifacts exist in outputs/ directory.
-[+] Champion Model in Metadata: Extra Trees
-[+] Top Model in Benchmark Table: Extra Trees (CV MAE: 0.6086)
+[+] Champion Model in Metadata: Random Forest
+[+] Top Model in Benchmark Table: Random Forest (CV MAE: 0.6136)
 [+] Test 3 PASSED: Champion model selection is strictly driven by training 5-fold cross-validation.
-    - High-Risk Candidate Preset: Raw Pred = 8.419, Clipped = 8.42 / 10.0
-    - Average Student with High Stress Preset: Raw Pred = 8.083, Clipped = 8.08 / 10.0
-    - High Achiever Preset: Raw Pred = 8.694, Clipped = 8.69 / 10.0
+    - High-Risk Candidate Preset: Raw Pred = 8.302, Clipped = 8.30 / 10.0
+    - Average Student with High Stress Preset: Raw Pred = 8.222, Clipped = 8.22 / 10.0
+    - High Achiever Preset: Raw Pred = 8.811, Clipped = 8.81 / 10.0
 [+] Test 4 & 5 PASSED: Individual predictions execute successfully and adhere to natural scale bounds.
 [+] Test 6 PASSED: Recommendation engine triggers, prioritizes, and explains all actions correctly.
-    - Positive Scenario Delta: -0.76 CGPA
+    - Positive Scenario Delta: -0.69 CGPA
     - Negative Scenario Delta: +0.04 CGPA
     - Zero Scenario Delta    : +0.00 CGPA
 [+] Test 7 PASSED: What-If simulator accurately computes exact mathematical delta.

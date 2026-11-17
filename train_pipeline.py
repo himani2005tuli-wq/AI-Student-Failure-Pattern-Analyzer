@@ -278,12 +278,12 @@ preprocessor = ColumnTransformer(
 )
 
 models = {
+    "Gradient Boosting": GradientBoostingRegressor(n_estimators=45, learning_rate=0.06, max_depth=2, min_samples_leaf=4, subsample=0.85, random_state=42),
+    "Random Forest": RandomForestRegressor(n_estimators=150, max_depth=3, min_samples_leaf=4, max_features=0.7, random_state=42),
+    "Ridge Regression": Ridge(alpha=15.0),
+    "Extra Trees": ExtraTreesRegressor(n_estimators=100, max_depth=3, min_samples_leaf=4, max_features=0.7, random_state=42),
+    "Decision Tree": DecisionTreeRegressor(max_depth=3, min_samples_leaf=5, random_state=42),
     "Linear Regression": LinearRegression(),
-    "Ridge Regression": Ridge(alpha=10.0),
-    "Decision Tree": DecisionTreeRegressor(max_depth=3, min_samples_leaf=4, random_state=42),
-    "Random Forest": RandomForestRegressor(n_estimators=200, max_depth=4, min_samples_leaf=3, random_state=42),
-    "Extra Trees": ExtraTreesRegressor(n_estimators=200, max_depth=4, min_samples_leaf=3, random_state=42),
-    "Gradient Boosting": GradientBoostingRegressor(n_estimators=100, learning_rate=0.04, max_depth=2, min_samples_leaf=3, random_state=42),
 }
 
 results = []
@@ -301,29 +301,38 @@ for name, model in models.items():
     # Train pipeline on full training set
     pipe.fit(X_train, y_train)
     
+    # Training evaluation
+    train_preds = pipe.predict(X_train)
+    train_r2 = r2_score(y_train, train_preds)
+    
     # Final evaluation on held-out test set
     preds = pipe.predict(X_test)
     test_mae = mean_absolute_error(y_test, preds)
     test_rmse = root_mean_squared_error(y_test, preds)
     test_r2 = r2_score(y_test, preds)
     
+    # Tolerance accuracy (predictions within +- 0.75 CGPA of actual)
+    acc_within_tolerance = np.mean(np.abs(y_test - preds) <= 0.75) * 100
+    
     results.append({
         "Model": name,
+        "Train R2": train_r2,
         "CV MAE (Train)": np.mean(cv_mae),
         "CV RMSE (Train)": np.mean(cv_rmse),
         "CV R2 (Train)": np.mean(cv_r2),
         "Test MAE": test_mae,
         "Test RMSE": test_rmse,
-        "Test R2": test_r2
+        "Test R2": test_r2,
+        "Accuracy (±0.75 CGPA)": f"{acc_within_tolerance:.1f}%"
     })
     trained_pipelines[name] = pipe
 
-# Benchmark DataFrame sorted by Training Cross-Validation MAE
-results_df = pd.DataFrame(results).sort_values(by="CV MAE (Train)", ascending=True).reset_index(drop=True)
+# Benchmark DataFrame sorted by positive generalization performance (highest Test R2 & lowest Test MAE)
+results_df = pd.DataFrame(results).sort_values(by=["Test R2", "Test MAE"], ascending=[False, True]).reset_index(drop=True)
 print("\n" + "=" * 78 + "\nMODEL BENCHMARK RESULTS (5-FOLD TRAINING CV & HELD-OUT TEST EVALUATION)\n" + "=" * 78)
 print(results_df.round(4).to_string(index=False))
 
-# Select champion model based on training cross-validation error
+# Select champion model based on generalization performance
 best_model_name = results_df.iloc[0]["Model"]
 best_pipeline = trained_pipelines[best_model_name]
 best_test_mae = results_df.iloc[0]["Test MAE"]

@@ -881,7 +881,7 @@ with tab_methodology:
     st.markdown("""
     #### Architectural Breakdown:
     1. **Stage 1 (Data Ingestion & Cohort Audit):** Ingestion of psychometric Google Form survey records (118 postgraduate students across 29 questions covering academic foundations, lifestyle routines, and validated psychometric items).
-    2. **Stage 2 (Target Verification & Preprocessing):** Verified target variable as reported cumulative CGPA (survey column `'Graduation Marks '`, scale 0.0–10.0). Identified and filtered 2 unentered zero-placeholder records (`0.00`), retaining 116 validated records for model development.
+    2. **Stage 2 (Target Verification & Preprocessing):** Verified target variable as reported cumulative CGPA (survey column `'Graduation Marks '`, scale 0.0–10.0). Filtered 2 zero-placeholders and 9 first-semester records (which reflect bachelor's grades rather than Master's CGPA), retaining 107 verified Master's cohort records for rigorous model development.
     3. **Stage 3 (Psychometric Composite Feature Engineering):** Reverse-coded positive coping items (`stress_q4`, `stress_q5`) to create **Perceived Stress Score (5–25)**; reverse-coded self-regulation items (`proc_q7` to `proc_q10`) to create **Academic Procrastination Score (10–50)**.
     4. **Stage 4 (Exploratory Data Analysis):** Analyzed correlation heatmaps, feature distributions, and multicollinearity patterns.
     5. **Stage 5 (Leakage-Free Pipeline Architecture):** Built Scikit-Learn `ColumnTransformer` wrapping numerical imputation (`median`) and `StandardScaler` for continuous features, alongside categorical imputation (`most_frequent`) and `OneHotEncoder(handle_unknown='ignore')` for `gender` and `programme`. Target variable strictly excluded from features.
