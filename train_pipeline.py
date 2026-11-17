@@ -311,8 +311,10 @@ for name, model in models.items():
     test_rmse = root_mean_squared_error(y_test, preds)
     test_r2 = r2_score(y_test, preds)
     
-    # Tolerance accuracy (predictions within +- 0.75 CGPA of actual)
-    acc_within_tolerance = np.mean(np.abs(y_test - preds) <= 0.75) * 100
+    # Tolerance accuracy
+    acc_within_1_0 = np.mean(np.abs(y_test - preds) <= 1.0) * 100
+    acc_within_075 = np.mean(np.abs(y_test - preds) <= 0.75) * 100
+    acc_risk = np.mean((y_test < 8.0) == (preds < 8.0)) * 100
     
     results.append({
         "Model": name,
@@ -323,7 +325,9 @@ for name, model in models.items():
         "Test MAE": test_mae,
         "Test RMSE": test_rmse,
         "Test R2": test_r2,
-        "Accuracy (±0.75 CGPA)": f"{acc_within_tolerance:.1f}%"
+        "Accuracy (±1.0 CGPA)": f"{acc_within_1_0:.1f}%",
+        "Accuracy (±0.75 CGPA)": f"{acc_within_075:.1f}%",
+        "Risk Class. Acc": f"{acc_risk:.1f}%"
     })
     trained_pipelines[name] = pipe
 
@@ -401,14 +405,23 @@ else:
     print("[!] Model does not have native tree feature_importances_; saving benchmark table.")
 
 # Save training metadata dictionary for frontend synchronization
+best_train_r2 = float(results_df.loc[results_df["Model"] == best_model_name, "Train R2"].values[0])
+best_acc_10 = float(np.mean(np.abs(y_test - best_preds) <= 1.00))
+best_acc_075 = float(np.mean(np.abs(y_test - best_preds) <= 0.75))
+best_risk_acc = float(np.mean((y_test < 8.0) == (best_preds < 8.0)))
+
 metadata = {
     "champion_model": best_model_name,
     "valid_records_count": len(df_final),
     "train_samples_count": len(X_train),
     "test_samples_count": len(X_test),
+    "train_r2": best_train_r2,
     "test_mae": float(best_test_mae),
     "test_rmse": float(best_test_rmse),
     "test_r2": float(best_test_r2),
+    "tolerance_acc_1_0": best_acc_10,
+    "tolerance_acc_0_75": best_acc_075,
+    "risk_classification_acc": best_risk_acc,
     "features": features,
     "num_cols": num_cols,
     "cat_cols": cat_cols,
